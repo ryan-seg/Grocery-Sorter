@@ -25,10 +25,22 @@ document.getElementById('btnSort').addEventListener('click', () => {
     const inputText = document.getElementById('inputList').value;
     
     // Split by lines, remove empty lines and Keep's checkbox formatting (like [ ] or ☑)
+// 2. SORT THE LIST
+document.getElementById('btnSort').addEventListener('click', () => {
+    const inputText = document.getElementById('inputList').value;
+    
     let items = inputText.split('\n')
-        .map(item => item.replace(/\[\s?\]|☑|☐/g, '').trim())
+        // 1. Remove items that are already checked
+        .filter(item => {
+            // Keep looks for [x], [X], ☑, or ✅
+            const isChecked = /^\s*(\[x\]|\[X\]|☑|✅)/.test(item);
+            return !isChecked; // Keep only if NOT checked
+        })
+        // 2. Clean up the remaining unchecked boxes/bullets
+        .map(item => item.replace(/^\s*(\[\s?\]|☐|\*|-|\+)\s*/, '').trim())
+        // 3. Remove empty lines
         .filter(item => item.length > 0);
-        
+
     let categorizedList = {
         "Produce": [],
         "Dairy": [],
