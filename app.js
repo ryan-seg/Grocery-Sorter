@@ -1,4 +1,3 @@
-// --- DEFAULT DATA SETUP ---
 let categories = JSON.parse(localStorage.getItem('categories')) || [
     "Produce", "Dairy & Chilled", "Meat & Fish", "Bakery", "Pantry", "Household", "Toiletries", "Frozen", "Miscellaneous"
 ];
@@ -7,7 +6,6 @@ let supermarkets = JSON.parse(localStorage.getItem('supermarkets')) || {};
 let editingSupermarket = null;
 let currentSortedData = {};
 
-// --- INITIALIZATION ---
 window.addEventListener('DOMContentLoaded', () => {
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) document.getElementById('apiKey').value = savedKey;
@@ -16,7 +14,6 @@ window.addEventListener('DOMContentLoaded', () => {
     renderCategories();
     renderSupermarkets();
 
-    // Handle Keep Share parameters if shared via mobile
     const urlParams = new URLSearchParams(window.location.search);
     const sharedText = urlParams.get('text');
     const sharedTitle = urlParams.get('title');
@@ -25,7 +22,6 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('inputList').value = sharedTitle ? `${sharedTitle}\n${sharedText}` : sharedText;
     }
 
-    // --- EVENT LISTENERS ---
     document.getElementById('toggleSettings').addEventListener('click', () => {
         document.getElementById('settingsPanel').classList.toggle('hidden');
     });
@@ -52,15 +48,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Backup triggers
     document.getElementById('btnExport').addEventListener('click', exportBackup);
     document.getElementById('btnImportTrigger').addEventListener('click', () => document.getElementById('importFile').click());
     document.getElementById('importFile').addEventListener('change', importBackup);
 
-    // AI Sort Button
     document.getElementById('btnSort').addEventListener('click', sortListWithAI);
-
-    // Copy & Clear
     document.getElementById('btnCopy').addEventListener('click', copyChecklistToClipboard);
     document.getElementById('btnClearList').addEventListener('click', () => {
         if (confirm("Clear current shopping list?")) {
@@ -70,7 +62,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// --- CATEGORY MANAGEMENT ---
 function renderCategories() {
     const list = document.getElementById('categoryList');
     list.innerHTML = '';
@@ -95,16 +86,16 @@ window.deleteCategory = function(index) {
     }
 }
 
-// --- SUPERMARKET MANAGEMENT ---
 function renderSupermarkets() {
     const list = document.getElementById('supermarketList');
     list.innerHTML = '';
-    const keys = Object.keys(supermarkets);
-    if (keys.length === 0) {
+    const sortedKeys = Object.keys(supermarkets).sort((a, b) => a.localeCompare(b));
+    
+    if (sortedKeys.length === 0) {
         list.innerHTML = '<p><small>No supermarkets added yet. Add one above!</small></p>';
         return;
     }
-    keys.forEach(name => {
+    sortedKeys.forEach(name => {
         list.innerHTML += `
             <div class="list-item">
                 <strong>${name}</strong>
@@ -132,22 +123,21 @@ window.deleteSupermarket = function(name) {
 function updateSupermarketDropdown() {
     const select = document.getElementById('supermarketSelect');
     select.innerHTML = '<option value="Default">Default Order</option>';
-    Object.keys(supermarkets).forEach(name => {
+    const sortedKeys = Object.keys(supermarkets).sort((a, b) => a.localeCompare(b));
+    sortedKeys.forEach(name => {
         select.innerHTML += `<option value="${name}">${name}</option>`;
     });
 }
 
-// --- LAYOUT EDITOR ---
 window.editLayout = function(name) {
     editingSupermarket = name;
     document.getElementById('supermarketLayoutArea').classList.remove('hidden');
-    document.getElementById('layoutTitleinnerText', `Edit Aisle Layout: ${name}`);
+    document.getElementById('layoutTitle').innerText = `Edit Aisle Layout: ${name}`;
     renderLayoutEditor(name);
 }
 
 function renderLayoutEditor(name) {
     let layout = supermarkets[name] || [...categories];
-    // Sync with global categories
     categories.forEach(cat => { if (!layout.includes(cat)) layout.push(cat); });
     layout = layout.filter(cat => categories.includes(cat));
     supermarkets[name] = layout;
@@ -176,7 +166,6 @@ window.moveCat = function(name, index, direction) {
     renderLayoutEditor(name);
 }
 
-// --- BACKUP & RESTORE ---
 function exportBackup() {
     const backupData = { categories, supermarkets };
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -217,7 +206,6 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// --- AI SORTING ---
 async function sortListWithAI() {
     const apiKey = document.getElementById('apiKey').value.trim();
     if (!apiKey) return alert("Please paste your Gemini API key in the top box first!");
@@ -226,7 +214,6 @@ async function sortListWithAI() {
     const inputText = document.getElementById('inputList').value;
     const btn = document.getElementById('btnSort');
     
-    // Filter out items already checked off
     let items = inputText.split('\n')
         .filter(item => !/^\s*(\[x\]|\[X\]|☑|✅)/.test(item))
         .map(item => item.replace(/^\s*(\[\s?\]|☐|\*|-|\+)\s*/, '').trim())
@@ -245,7 +232,7 @@ async function sortListWithAI() {
     List: ${JSON.stringify(items)}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -271,7 +258,6 @@ async function sortListWithAI() {
     }
 }
 
-// --- INTERACTIVE CHECKLIST UI WITH RE-CATEGORIZATION ---
 function renderChecklistUI() {
     const area = document.getElementById('checklistArea');
     area.innerHTML = '';
@@ -279,7 +265,6 @@ function renderChecklistUI() {
     const selectedSupermarket = document.getElementById('supermarketSelect').value;
     const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
 
-    // Ensure all categories exist in sorted object
     sortOrder.forEach(cat => { if (!currentSortedData[cat]) currentSortedData[cat] = []; });
 
     sortOrder.forEach(category => {
@@ -319,8 +304,6 @@ window.toggleCheck = function(checkbox) {
 
 window.openMoveModal = function(fromCategory, itemIndex) {
     const itemName = currentSortedData[fromCategory][itemIndex];
-    let options = categories.filter(c => c !== fromCategory).map(c => `<option value="${c}">${c}</option>`).join('');
-    
     const targetCat = prompt(`Move "${itemName}" from ${fromCategory} to which category?\n\nAvailable categories:\n${categories.filter(c => c !== fromCategory).join(', ')}`);
     
     if (targetCat && categories.includes(targetCat)) {
