@@ -209,17 +209,48 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// AI Sorting with Fixed Groq Integration & Gemini Fallbacks
+// SMART LOCAL OFFLINE FALLBACK MATCHER (Runs instantly if all AI servers fail)
+function runLocalFallbackSort(items) {
+    let result = {};
+    categories.forEach(c => result[c] = []);
+    
+    // Keyword rules for typical supermarket items
+    const rules = {
+        "Produce": ["apple", "banana", "tomato", "onion", "garlic", "potato", "carrot", "avocado", "salad", "lemon", "strawberry", "blueberry", "berry", "fruit", "veg", "cucumber", "courgette", "pepper", "mushroom", "spinach", "bean", "cabbage", "leek", "asparagus", "herb", "basil", "chive"],
+        "Dairy & Chilled": ["milk", "cheese", "butter", "yogurt", "cream", "norpak", "chedar", "mozzarella", "egg", "feta", "kefir", "paneer", "halloumi", "sour cream", "mascarpone", "elmlea"],
+        "Meat & Fish": ["chicken", "beef", "pork", "sausage", "bacon", "mince", "ham", "steak", "fish", "salmon", "tuna", "prawn", "lardons", "chorizo", "pepperoni", "turkey"],
+        "Bakery": ["bread", "bun", "bagel", "wrap", "pita", "sourdough", "crumpet", "muffin", "pastry", "croissant", "brioche", "flatbread", "focaccia"],
+        "Pantry": ["oil", "ketchup", "paste", "chips", "sauce", "beans", "tahini", "sweetener", "latte", "stock", "rice", "marmite", "mash", "sugar", "flour", "pasta", "spice", "honey", "chocolate", "crisp", "cereal", "oat", "coffee", "tea", "jam", "chutney", "soup", "vinegar", "mayo", "salad cream"],
+        "Household": ["cleaner", "wipes", "bags", "freshener", "foil", "tape", "roll", "detergent", "tablets", "plug-ins", "bleach", "sponge", "kitchen roll", "toilet paper"],
+        "Toiletries": ["spray", "balm", "mouthwash", "toothpaste", "deodorant", "gel", "floss", "shampoo", "soap", "vitamin", "hayfever", "tablet"],
+        "Frozen": ["ice cream", "frozen", "ice", "pizza", "chip", "pea", "spinach"]
+    };
+
+    items.forEach(item => {
+        let placed = false;
+        const lower = item.toLowerCase();
+
+        for (const [cat, keywords] of Object.entries(rules)) {
+            if (categories.includes(cat) && keywords.some(kw => lower.includes(kw))) {
+                result[cat].push(item);
+                placed = true;
+                break;
+            }
+        }
+
+        if (!placed) {
+            const miscCat = categories.includes("Miscellaneous") ? "Miscellaneous" : categories[0];
+            result[miscCat].push(item);
+        }
+    });
+
+    return result;
+}
+
+// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Instant Local Backup
 async function sortListWithAI() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
-
-    if (!groqKey && !geminiKey) {
-        return alert("Please paste at least a Groq API key or a Gemini API key in the settings!");
-    }
-    
-    if (groqKey) localStorage.setItem('groq_api_key', groqKey);
-    if (geminiKey) localStorage.setItem('gemini_api_key', geminiKey);
 
     const inputText = document.getElementById('inputList').value;
     const ignoreChecked = document.getElementById('ignoreChecked').checked;
@@ -310,8 +341,13 @@ async function sortListWithAI() {
     btn.innerText = "✨ Sort Shopping List";
     btn.disabled = false;
 
+    // 4. OFFLINE / ULTIMATE FALLBACK: If all cloud servers are overloaded, run locally!
     if (!success) {
-        alert("All AI providers failed. Please verify your Groq or Gemini API key is correct in the settings.");
+        console.warn("All AI servers overloaded. Falling back to local offline sorter.");
+        currentSortedData = runLocalFallbackSort(items);
+        renderChecklistUI();
+        document.getElementById('outputContainer').classList.remove('hidden');
+        document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
         return;
     }
 
@@ -325,7 +361,11 @@ async function sortListWithAI() {
         document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error(error);
-        alert(`Parsing failed: ${error.message}`);
+        // If JSON parsing fails, gracefully fall back to local rule engine
+        currentSortedData = runLocalFallbackSort(items);
+        renderChecklistUI();
+        document.getElementById('outputContainer').classList.remove('hidden');
+        document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
     }
 }
 
@@ -389,7 +429,7 @@ window.openMoveModal = function(fromCategory, itemIndex) {
 
 function copyChecklistToClipboard() {
     let outputText = "Organized Groceries\n\n";
-    const selectedSupermarket = document.getElementById('supermarketSelect').value;
+    const selectedSupermarket = document.getElementById('supermarketSelect' ).value;
     const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
 
     sortOrder.forEach(category => {
