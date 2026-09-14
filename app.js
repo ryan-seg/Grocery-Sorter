@@ -1,4 +1,4 @@
-// --- BULLET-PROOF SAFE LOADING ---
+// Default State
 let categories = ["Produce", "Dairy & Chilled", "Meat & Fish", "Bakery", "Pantry", "Household", "Toiletries", "Frozen", "Miscellaneous"];
 try {
     const savedCats = localStorage.getItem('categories');
@@ -13,15 +13,15 @@ try {
     const savedSupers = localStorage.getItem('supermarkets');
     if (savedSupers) {
         const parsed = JSON.parse(savedSupers);
-        if (typeof parsed === 'object') supermarkets = parsed;
+        if (typeof parsed === 'object' && parsed !== null) supermarkets = parsed;
     }
 } catch (e) { console.error("Memory reset for supermarkets."); }
 
 let editingSupermarket = null;
 let currentSortedData = {};
 
-// --- INITIALIZATION ---
-window.addEventListener('DOMContentLoaded', () => {
+// Safe App Initialization (Handles both ready and loading states)
+function initApp() {
     const savedGroq = localStorage.getItem('groq_api_key');
     if (savedGroq) document.getElementById('groqKey').value = savedGroq;
 
@@ -39,49 +39,33 @@ window.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState({}, document.title, window.location.pathname);
         document.getElementById('inputList').value = sharedTitle ? `${sharedTitle}\n${sharedText}` : sharedText;
     }
+}
 
-    document.getElementById('toggleSettings').addEventListener('click', () => {
-        document.getElementById('settingsPanel').classList.toggle('hidden');
-    });
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initApp();
+} else {
+    document.addEventListener('DOMContentLoaded', initApp);
+}
 
-    document.getElementById('btnAddCategory').addEventListener('click', () => {
-        const val = document.getElementById('newCategory').value.trim();
-        if (val && !categories.includes(val)) {
-            categories.push(val);
-            saveData();
-            renderCategories();
-            document.getElementById('newCategory').value = '';
-            if (editingSupermarket) renderLayoutEditor(editingSupermarket);
-        }
-    });
+// UI Handlers
+window.toggleSettingsPanel = function() {
+    document.getElementById('settingsPanel').classList.toggle('hidden');
+}
 
-    document.getElementById('btnAddSupermarket').addEventListener('click', () => {
-        const val = document.getElementById('newSupermarket').value.trim();
-        if (val && !supermarkets[val]) {
-            supermarkets[val] = [...categories]; 
-            saveData();
-            renderSupermarkets();
-            updateSupermarketDropdown();
-            document.getElementById('newSupermarket').value = '';
-        }
-    });
-
-    document.getElementById('btnExport').addEventListener('click', exportBackup);
-    document.getElementById('btnImportTrigger').addEventListener('click', () => document.getElementById('importFile').click());
-    document.getElementById('importFile').addEventListener('change', importBackup);
-
-    document.getElementById('btnSort').addEventListener('click', sortListWithAI);
-    document.getElementById('btnCopy').addEventListener('click', copyChecklistToClipboard);
-    document.getElementById('btnClearList').addEventListener('click', () => {
-        if (confirm("Clear current shopping list?")) {
-            document.getElementById('outputContainer').classList.add('hidden');
-            document.getElementById('checklistArea').innerHTML = '';
-        }
-    });
-});
+window.addCategory = function() {
+    const val = document.getElementById('newCategory').value.trim();
+    if (val && !categories.includes(val)) {
+        categories.push(val);
+        saveData();
+        renderCategories();
+        document.getElementById('newCategory').value = '';
+        if (editingSupermarket) renderLayoutEditor(editingSupermarket);
+    }
+}
 
 function renderCategories() {
     const list = document.getElementById('categoryList');
+    if (!list) return;
     list.innerHTML = '';
     categories.forEach((cat, index) => {
         list.innerHTML += `
@@ -104,8 +88,20 @@ window.deleteCategory = function(index) {
     }
 }
 
+window.addSupermarket = function() {
+    const val = document.getElementById('newSupermarket').value.trim();
+    if (val && !supermarkets[val]) {
+        supermarkets[val] = [...categories]; 
+        saveData();
+        renderSupermarkets();
+        updateSupermarketDropdown();
+        document.getElementById('newSupermarket').value = '';
+    }
+}
+
 function renderSupermarkets() {
     const list = document.getElementById('supermarketList');
+    if (!list) return;
     list.innerHTML = '';
     const sortedKeys = Object.keys(supermarkets).sort((a, b) => a.localeCompare(b));
     
@@ -140,6 +136,7 @@ window.deleteSupermarket = function(name) {
 
 function updateSupermarketDropdown() {
     const select = document.getElementById('supermarketSelect');
+    if (!select) return;
     select.innerHTML = '<option value="Default">Default Order</option>';
     const sortedKeys = Object.keys(supermarkets).sort((a, b) => a.localeCompare(b));
     sortedKeys.forEach(name => {
@@ -162,6 +159,7 @@ function renderLayoutEditor(name) {
     saveData();
 
     const list = document.getElementById('layoutList');
+    if (!list) return;
     list.innerHTML = '';
     layout.forEach((cat, index) => {
         list.innerHTML += `
@@ -184,7 +182,7 @@ window.moveCat = function(name, index, direction) {
     renderLayoutEditor(name);
 }
 
-function exportBackup() {
+window.exportBackup = function() {
     const backupData = { categories, supermarkets };
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -194,7 +192,11 @@ function exportBackup() {
     a.click();
 }
 
-function importBackup(event) {
+window.triggerImport = function() {
+    document.getElementById('importFile').click();
+}
+
+window.importBackup = function(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -224,7 +226,7 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// LOCAL FALLBACK ENGINE
+// Local Dictionary Engine (Offline Backup)
 function runLocalFallbackSort(items) {
     let result = {};
     categories.forEach(c => result[c] = []);
@@ -294,7 +296,6 @@ function runLocalFallbackSort(items) {
         for (const [cat, keywords] of Object.entries(rules)) {
             if (categories.includes(cat)) {
                 const matched = keywords.some(kw => lower.includes(kw));
-
                 if (matched) {
                     result[cat].push(item);
                     placed = true;
@@ -312,8 +313,8 @@ function runLocalFallbackSort(items) {
     return result;
 }
 
-// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Enhanced Local Backup
-async function sortListWithAI() {
+// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Offline Engine
+window.sortListWithAI = async function() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
 
@@ -406,7 +407,7 @@ async function sortListWithAI() {
     btn.innerText = "✨ Sort Shopping List";
     btn.disabled = false;
 
-    // 4. LOCAL OFFLINE ENGINE
+    // 4. OFFLINE FALLBACK
     if (!success) {
         console.warn("All AI servers busy. Running local dictionary engine.");
         currentSortedData = runLocalFallbackSort(items);
@@ -435,6 +436,7 @@ async function sortListWithAI() {
 
 function renderChecklistUI() {
     const area = document.getElementById('checklistArea');
+    if (!area) return;
     area.innerHTML = '';
 
     const selectedSupermarket = document.getElementById('supermarketSelect').value;
@@ -452,4 +454,67 @@ function renderChecklistUI() {
         `;
 
         items.forEach((item, itemIndex) => {
-            grou
+            groupHtml += `
+                <div class="grocery-row" id="row-${category}-${itemIndex}">
+                    <div class="grocery-left">
+                        <input type="checkbox" onchange="toggleCheck(this)">
+                        <span>${item}</span>
+                    </div>
+                    <button class="secondary-btn" onclick="openMoveModal('${category}', ${itemIndex})">Move</button>
+                </div>
+            `;
+        });
+
+        groupHtml += `</div>`;
+        area.innerHTML += groupHtml;
+    });
+}
+
+window.toggleCheck = function(checkbox) {
+    const row = checkbox.closest('.grocery-row');
+    if (checkbox.checked) {
+        row.classList.add('checked');
+    } else {
+        row.classList.remove('checked');
+    }
+}
+
+window.openMoveModal = function(fromCategory, itemIndex) {
+    const itemName = currentSortedData[fromCategory][itemIndex];
+    const targetCat = prompt(`Move "${itemName}" from ${fromCategory} to which category?\n\nAvailable categories:\n${categories.filter(c => c !== fromCategory).join(', ')}`);
+    
+    if (targetCat && categories.includes(targetCat)) {
+        currentSortedData[fromCategory].splice(itemIndex, 1);
+        if (!currentSortedData[targetCat]) currentSortedData[targetCat] = [];
+        currentSortedData[targetCat].push(itemName);
+        renderChecklistUI();
+    } else if (targetCat) {
+        alert("Category not found. Please match exact category names.");
+    }
+}
+
+window.copyChecklistToClipboard = function() {
+    let outputText = "Organized Groceries\n\n";
+    const selectedSupermarket = document.getElementById('supermarketSelect').value;
+    const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
+
+    sortOrder.forEach(category => {
+        const items = currentSortedData[category] || [];
+        if (items.length > 0) {
+            outputText += `${category.toUpperCase()}:\n`;
+            items.forEach(i => outputText += `[ ] ${i}\n`);
+            outputText += `\n`;
+        }
+    });
+
+    navigator.clipboard.writeText(outputText.trim()).then(() => {
+        alert("Checklist copied to clipboard! You can paste it into Keep or notes.");
+    });
+}
+
+window.clearShoppingList = function() {
+    if (confirm("Clear current shopping list?")) {
+        document.getElementById('outputContainer').classList.add('hidden');
+        document.getElementById('checklistArea').innerHTML = '';
+    }
+}
