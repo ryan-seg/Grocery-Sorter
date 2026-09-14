@@ -38,11 +38,11 @@
   
   <div class="card">
     <label for="groqKey"><strong>Groq API Key (Primary & Fast):</strong></label>
-    <input type="password" id="groqKey" placeholder="Paste Groq API key...">
+    <input type="password" id="groqKey" placeholder="Paste Groq API key (starts with gsk_)...">
     <small><a href="https://console.groq.com/" target="_blank">Get a free Groq key here</a></small>
   </div>
 
-  <button id="toggleSettings" class="secondary-btn">⚙️ Configure Categories, Supermarkets & Backups</button>
+  <button id="toggleSettings" onclick="toggleSettingsPanel()" class="secondary-btn">⚙️ Configure Categories, Supermarkets & Backups</button>
 
   <div id="settingsPanel" class="card hidden">
     <label for="apiKey"><strong>Gemini API Key (Backup):</strong></label>
@@ -53,7 +53,7 @@
     <h3>Categories</h3>
     <div style="display:flex; gap: 5px;">
       <input type="text" id="newCategory" placeholder="e.g. Household, Bakery">
-      <button id="btnAddCategory" style="margin-top:5px; height: 42px;">Add</button>
+      <button onclick="addCategory()" style="margin-top:5px; height: 42px;">Add</button>
     </div>
     <div id="categoryList"></div>
 
@@ -62,7 +62,7 @@
     <h3>Supermarkets & Aisle Layouts</h3>
     <div style="display:flex; gap: 5px;">
       <input type="text" id="newSupermarket" placeholder="e.g. Aldi, M&S">
-      <button id="btnAddSupermarket" style="margin-top:5px; height: 42px;">Add</button>
+      <button onclick="addSupermarket()" style="margin-top:5px; height: 42px;">Add</button>
     </div>
     <div id="supermarketList"></div>
 
@@ -75,9 +75,9 @@
     <hr>
     <h3>Data Backup</h3>
     <div style="display:flex; gap: 10px;">
-      <button id="btnExport" class="secondary-btn" style="flex:1;">📤 Export Backup</button>
-      <button id="btnImportTrigger" class="secondary-btn" style="flex:1;">📥 Import Backup</button>
-      <input type="file" id="importFile" class="hidden" accept=".json">
+      <button onclick="exportBackup()" class="secondary-btn" style="flex:1;">📤 Export Backup</button>
+      <button onclick="triggerImport()" class="secondary-btn" style="flex:1;">📥 Import Backup</button>
+      <input type="file" id="importFile" class="hidden" accept=".json" onchange="importBackup(event)">
     </div>
   </div>
 
@@ -94,28 +94,16 @@
       <input type="checkbox" id="ignoreChecked" checked> Ignore items already checked off in Keep
     </label>
     
-    <button id="btnSort">✨ Sort Shopping List</button>
+    <button id="btnSort" onclick="sortListWithAI()">✨ Sort Shopping List</button>
   </div>
 
   <div id="outputContainer" class="hidden">
     <h2>Shopping List</h2>
     <div id="checklistArea"></div>
-    <button id="btnCopy" class="secondary-btn">📋 Copy List to Clipboard</button>
-    <button id="btnClearList" class="danger-btn">🗑️ Clear List</button>
+    <button onclick="copyChecklistToClipboard()" class="secondary-btn">📋 Copy List to Clipboard</button>
+    <button onclick="clearShoppingList()" class="danger-btn">🗑️ Clear List</button>
   </div>
 
   <script src="app.js"></script>
-  
-  <!-- NUKE OLD SERVICE WORKERS -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-          registration.unregister();
-          console.log("Unregistered old ghost service worker.");
-        }
-      });
-    }
-  </script>
 </body>
 </html>
