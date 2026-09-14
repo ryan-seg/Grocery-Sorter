@@ -35,13 +35,12 @@ document.getElementById('btnSort').addEventListener('click', () => {
         .map(item => item.replace(/^\s*(\[\s?\]|☐|\*|-|\+)\s*/, '').trim()) // Clean unchecked boxes/bullets
         .filter(item => item.length > 0); // Remove empty lines
         
-    let categorizedList = {
-        "Produce": [],
-        "Dairy": [],
-        "Meat": [],
-        "Bakery": [],
-        "Other": []
-    };
+    // THIS IS THE FIX: Automatically create buckets based on your dictionary
+    let categorizedList = {};
+    for (const key of Object.keys(groceryDictionary)) {
+        categorizedList[key] = [];
+    }
+    categorizedList["Other"] = []; // Always ensure the "Other" bucket exists
 
     items.forEach(item => {
         let foundCategory = "Other";
@@ -67,6 +66,7 @@ document.getElementById('btnSort').addEventListener('click', () => {
 
     document.getElementById('outputList').value = outputText.trim();
 });
+
 
 // 3. SHARE BACK TO KEEP 
 document.getElementById('btnShare').addEventListener('click', async () => {
