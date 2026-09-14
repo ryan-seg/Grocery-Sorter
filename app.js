@@ -209,21 +209,67 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// SMART LOCAL OFFLINE FALLBACK MATCHER (Runs instantly if all AI servers fail)
+// EXPANDED COMPREHENSIVE LOCAL UK SUPERMARKET DICTIONARY
 function runLocalFallbackSort(items) {
     let result = {};
     categories.forEach(c => result[c] = []);
     
-    // Keyword rules for typical supermarket items
     const rules = {
-        "Produce": ["apple", "banana", "tomato", "onion", "garlic", "potato", "carrot", "avocado", "salad", "lemon", "strawberry", "blueberry", "berry", "fruit", "veg", "cucumber", "courgette", "pepper", "mushroom", "spinach", "bean", "cabbage", "leek", "asparagus", "herb", "basil", "chive"],
-        "Dairy & Chilled": ["milk", "cheese", "butter", "yogurt", "cream", "norpak", "chedar", "mozzarella", "egg", "feta", "kefir", "paneer", "halloumi", "sour cream", "mascarpone", "elmlea"],
-        "Meat & Fish": ["chicken", "beef", "pork", "sausage", "bacon", "mince", "ham", "steak", "fish", "salmon", "tuna", "prawn", "lardons", "chorizo", "pepperoni", "turkey"],
-        "Bakery": ["bread", "bun", "bagel", "wrap", "pita", "sourdough", "crumpet", "muffin", "pastry", "croissant", "brioche", "flatbread", "focaccia"],
-        "Pantry": ["oil", "ketchup", "paste", "chips", "sauce", "beans", "tahini", "sweetener", "latte", "stock", "rice", "marmite", "mash", "sugar", "flour", "pasta", "spice", "honey", "chocolate", "crisp", "cereal", "oat", "coffee", "tea", "jam", "chutney", "soup", "vinegar", "mayo", "salad cream"],
-        "Household": ["cleaner", "wipes", "bags", "freshener", "foil", "tape", "roll", "detergent", "tablets", "plug-ins", "bleach", "sponge", "kitchen roll", "toilet paper"],
-        "Toiletries": ["spray", "balm", "mouthwash", "toothpaste", "deodorant", "gel", "floss", "shampoo", "soap", "vitamin", "hayfever", "tablet"],
-        "Frozen": ["ice cream", "frozen", "ice", "pizza", "chip", "pea", "spinach"]
+        "Produce": [
+            "apple", "apples", "banana", "bananas", "avo", "avos", "avocado", "avocadoes", "avocados", 
+            "lemon", "lemons", "lime", "limes", "strawberry", "strawberries", "strawbs", "blueberry", "blueberries", 
+            "raspberry", "raspberries", "peach", "peaches", "pomegranate", "cherry", "cherries", "mango", "fruit", 
+            "tomato", "tomatoes", "datterino", "onion", "onions", "garlic", "potato", "potatoes", "spud", "spuds", 
+            "carrot", "carrots", "salad", "rocket", "lettuce", "cucumber", "courgette", "courgettes", "pepper", 
+            "peppers", "mushroom", "mushrooms", "spinach", "bean", "beans", "runner beans", "green beans", 
+            "stringless beans", "cabbage", "leek", "leeks", "asparagus", "herb", "herbs", "basil", "chive", "chives", 
+            "mint", "sweet potato", "sweet potatoes", "aubergine", "spring onion", "spring onions", "corn", 
+            "celery", "rotisserie chicken", "cooked chicken", "cured meats", "quiche", "hummus", "dip", "dips"
+        ],
+        "Dairy & Chilled": [
+            "milk", "milks", "lf milk", "oat milk", "dairy", "cheese", "cheeses", "cheddar", "mozzarella", "parmesan", 
+            "parmigiano", "feta", "burrata", "halloumi", "cottage cheese", "cream cheese", "mascarpone", "sour cream", 
+            "creme fraiche", "whipping cream", "double cream", "clotted cream", "elmlea", "butter", "norpak", "margarine", 
+            "egg", "eggs", "yoghurt", "yogurt", "kefir", "pudding", "custard", "ready meal", "lasagne sheets", 
+            "shortcrust pastry", "garlic bread", "guacamole", "perinnaise"
+        ],
+        "Meat & Fish": [
+            "chicken", "chickens", "beef", "pork", "sausage", "sausages", "bacon", "mince", "ham", "steak", 
+            "steaks", "fish", "salmon", "tuna", "prawn", "prawns", "lardons", "chorizo", "pepperoni", "turkey", 
+            "burgers", "burger", "breaded chicken", "meat", "lamb"
+        ],
+        "Bakery": [
+            "bread", "breads", "loaf", "sourdough", "bun", "buns", "bagel", "bagels", "wrap", "wraps", "pita", 
+            "pittas", "crumpet", "crumpets", "muffin", "muffins", "pastry", "pastries", "croissant", "brioche", 
+            "flatbread", "focaccia", "tortilla", "tortillas", "roll", "rolls", "scone", "scones", "panini"
+        ],
+        "Pantry": [
+            "oil", "olive oil", "ketchup", "paste", "chipotle", "chipotle paste", "sauce", "sauces", "pesto", 
+            "mayo", "mayonnaise", "salad cream", "dressing", "vinegar", "balsamic", "glaze", "syrup", "honey", 
+            "agave", "chutney", "hot sauce", "passata", "puree", "tomato puree", "beans", "baked beans", "black beans", 
+            "butter beans", "cannelini", "pulses", "lentils", "chickpeas", "rice", "basmati", "spaghetti", "pasta", 
+            "gnocchi", "risotto", "noodles", "cereal", "weetabix", "oats", "granola", "flour", "sugar", "caster sugar", 
+            "brown sugar", "bicarbonate", "cocoa", "choc chips", "chocolate", "vanilla", "yeast", "salt", "peppercorns", 
+            "paprika", "turmeric", "spices", "seasoning", "stock", "stock cubes", "mash", "instant mash", "coffee", 
+            "tea", "hot chocolate", "squash", "cordial", "juice", "pepsi", "fanta", "cider", "wine", "rioja", "crisps", 
+            "sweets", "biscuits", "oreos", "biscoff", "jam", "marmite", "tinned fruit", "chopped tomatoes", "mutti", "polpa"
+        ],
+        "Household": [
+            "cleaner", "cleaning", "wipes", "kitchen wipes", "anti bac wipes", "floor wipes", "big wipes", 
+            "bags", "bin bags", "kitchen bin bags", "bathroom bin bags", "food bags", "freshener", "air freshener", 
+            "foil", "foil tray", "tape", "paper tape", "roll", "kitchen roll", "toilet roll", "toilet paper", 
+            "detergent", "laundry detergent", "fabric conditioner", "tablets", "dishwasher tablets", "dishwasher cleaner", 
+            "sponges", "duster", "silicone", "weed killer", "slug pellets", "twine", "paint", "compost"
+        ],
+        "Toiletries": [
+            "spray", "body spray", "balm", "lip balm", "mouthwash", "toothpaste", "deodorant", "gel", "shave gel", 
+            "floss", "dental floss", "shampoo", "soap", "multivitamins", "vitamin", "hayfever", "hay fever", 
+            "tablets", "serum", "rituals"
+        ],
+        "Frozen": [
+            "ice cream", "ice creams", "nuii", "frozen", "ice", "ice cubes", "frozen berries", "frozen spinach", 
+            "frozen mushrooms", "frozen fish", "fish fingers", "chips", "frozen smoothie"
+        ]
     };
 
     items.forEach(item => {
@@ -231,10 +277,18 @@ function runLocalFallbackSort(items) {
         const lower = item.toLowerCase();
 
         for (const [cat, keywords] of Object.entries(rules)) {
-            if (categories.includes(cat) && keywords.some(kw => lower.includes(kw))) {
-                result[cat].push(item);
-                placed = true;
-                break;
+            if (categories.includes(cat)) {
+                // Exact match check or boundary check to prevent misclassifications
+                const matched = keywords.some(kw => {
+                    const regex = new RegExp(`\\b${kw}\\b`, 'i');
+                    return regex.test(lower);
+                });
+
+                if (matched) {
+                    result[cat].push(item);
+                    placed = true;
+                    break;
+                }
             }
         }
 
@@ -247,7 +301,7 @@ function runLocalFallbackSort(items) {
     return result;
 }
 
-// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Instant Local Backup
+// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Enhanced Local Backup
 async function sortListWithAI() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
@@ -272,15 +326,15 @@ async function sortListWithAI() {
 
     if (!categories.includes("Miscellaneous")) categories.push("Miscellaneous");
 
-    const prompt = `You are an expert British grocery store categorizer. Categorize the following shopping list items into ONLY these exact categories: ${categories.join(', ')}. 
-    If an item does not fit cleanly anywhere, assign it to "Miscellaneous". Account for UK brand names (e.g., Norpak is Dairy, Sainos is Sainsbury's) and correct minor typos.
-    Return ONLY a raw JSON object where keys are the category names and values are arrays of strings. Do NOT include markdown code ticks like \`\`\`json.
-    List: ${JSON.stringify(items)}`;
+    const prompt = `You are an expert British supermarket grocery classifier. Categorize the items strictly into ONLY these categories: ${categories.join(', ')}.
+    Apply realistic UK grocery logic (e.g., Cheddar -> Dairy & Chilled, Foil tray -> Household, Chipotle paste -> Pantry, Boots spray -> Toiletries).
+    Return ONLY a raw JSON object where keys are category names and values are arrays of string items. No markdown.
+    List to sort: ${JSON.stringify(items)}`;
 
     let success = false;
     let aiText = "";
 
-    // 1. PRIMARY: Try Groq (Llama 3.3 70B)
+    // 1. PRIMARY: Groq (Llama 3.3 70B)
     if (groqKey && !success) {
         try {
             btn.innerText = "⏳ Sorting with Groq (Llama 3)...";
@@ -304,7 +358,7 @@ async function sortListWithAI() {
         } catch (e) { console.warn("Groq failed:", e); }
     }
 
-    // 2. SECONDARY BACKUP: Try Gemini Flash
+    // 2. SECONDARY: Gemini Flash
     if (geminiKey && !success) {
         try {
             btn.innerText = "⏳ Groq busy. Trying Gemini Flash...";
@@ -321,7 +375,7 @@ async function sortListWithAI() {
         } catch (e) { console.warn("Flash failed:", e); }
     }
 
-    // 3. TERTIARY BACKUP: Try Gemini Pro
+    // 3. TERTIARY: Gemini Pro
     if (geminiKey && !success) {
         try {
             btn.innerText = "⏳ Trying Gemini Pro backup...";
@@ -341,9 +395,9 @@ async function sortListWithAI() {
     btn.innerText = "✨ Sort Shopping List";
     btn.disabled = false;
 
-    // 4. OFFLINE / ULTIMATE FALLBACK: If all cloud servers are overloaded, run locally!
+    // 4. LOCAL OFFLINE ENGINE
     if (!success) {
-        console.warn("All AI servers overloaded. Falling back to local offline sorter.");
+        console.warn("All AI servers busy. Running local dictionary engine.");
         currentSortedData = runLocalFallbackSort(items);
         renderChecklistUI();
         document.getElementById('outputContainer').classList.remove('hidden');
@@ -361,7 +415,6 @@ async function sortListWithAI() {
         document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error(error);
-        // If JSON parsing fails, gracefully fall back to local rule engine
         currentSortedData = runLocalFallbackSort(items);
         renderChecklistUI();
         document.getElementById('outputContainer').classList.remove('hidden');
@@ -393,55 +446,4 @@ function renderChecklistUI() {
                     <div class="grocery-left">
                         <input type="checkbox" onchange="toggleCheck(this)">
                         <span>${item}</span>
-                    </div>
-                    <button class="secondary-btn" onclick="openMoveModal('${category}', ${itemIndex})">Move</button>
-                </div>
-            `;
-        });
-
-        groupHtml += `</div>`;
-        area.innerHTML += groupHtml;
-    });
-}
-
-window.toggleCheck = function(checkbox) {
-    const row = checkbox.closest('.grocery-row');
-    if (checkbox.checked) {
-        row.classList.add('checked');
-    } else {
-        row.classList.remove('checked');
-    }
-}
-
-window.openMoveModal = function(fromCategory, itemIndex) {
-    const itemName = currentSortedData[fromCategory][itemIndex];
-    const targetCat = prompt(`Move "${itemName}" from ${fromCategory} to which category?\n\nAvailable categories:\n${categories.filter(c => c !== fromCategory).join(', ')}`);
-    
-    if (targetCat && categories.includes(targetCat)) {
-        currentSortedData[fromCategory].splice(itemIndex, 1);
-        if (!currentSortedData[targetCat]) currentSortedData[targetCat] = [];
-        currentSortedData[targetCat].push(itemName);
-        renderChecklistUI();
-    } else if (targetCat) {
-        alert("Category not found. Please match exact category names.");
-    }
-}
-
-function copyChecklistToClipboard() {
-    let outputText = "Organized Groceries\n\n";
-    const selectedSupermarket = document.getElementById('supermarketSelect' ).value;
-    const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
-
-    sortOrder.forEach(category => {
-        const items = currentSortedData[category] || [];
-        if (items.length > 0) {
-            outputText += `${category.toUpperCase()}:\n`;
-            items.forEach(i => outputText += `[ ] ${i}\n`);
-            outputText += `\n`;
-        }
-    });
-
-    navigator.clipboard.writeText(outputText.trim()).then(() => {
-        alert("Checklist copied to clipboard! You can paste it into Keep or notes.");
-    });
-}
+                   
