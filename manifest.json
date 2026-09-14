@@ -1,7 +1,8 @@
 {
   "name": "Grocery Sorter",
   "short_name": "Groceries",
-  "start_url": "./",
+  "start_url": "/Grocery-Sorter/",
+  "scope": "/Grocery-Sorter/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4285f4",
@@ -18,7 +19,7 @@
     }
   ],
   "share_target": {
-    "action": "./",
+    "action": "/Grocery-Sorter/",
     "method": "GET",
     "params": {
       "title": "title",
