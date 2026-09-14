@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grocery-sorter-dynamic';
+const CACHE_NAME = 'grocery-sorter-v3';
 
 self.addEventListener('install', event => {
   event.waitUntil(
