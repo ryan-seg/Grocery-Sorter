@@ -1,11 +1,26 @@
-let categories = JSON.parse(localStorage.getItem('categories')) || [
-    "Produce", "Dairy & Chilled", "Meat & Fish", "Bakery", "Pantry", "Household", "Toiletries", "Frozen", "Miscellaneous"
-];
+// --- BULLET-PROOF SAFE LOADING ---
+let categories = ["Produce", "Dairy & Chilled", "Meat & Fish", "Bakery", "Pantry", "Household", "Toiletries", "Frozen", "Miscellaneous"];
+try {
+    const savedCats = localStorage.getItem('categories');
+    if (savedCats) {
+        const parsed = JSON.parse(savedCats);
+        if (Array.isArray(parsed) && parsed.length > 0) categories = parsed;
+    }
+} catch (e) { console.error("Memory reset for categories."); }
 
-let supermarkets = JSON.parse(localStorage.getItem('supermarkets')) || {};
+let supermarkets = {};
+try {
+    const savedSupers = localStorage.getItem('supermarkets');
+    if (savedSupers) {
+        const parsed = JSON.parse(savedSupers);
+        if (typeof parsed === 'object') supermarkets = parsed;
+    }
+} catch (e) { console.error("Memory reset for supermarkets."); }
+
 let editingSupermarket = null;
 let currentSortedData = {};
 
+// --- INITIALIZATION ---
 window.addEventListener('DOMContentLoaded', () => {
     const savedGroq = localStorage.getItem('groq_api_key');
     if (savedGroq) document.getElementById('groqKey').value = savedGroq;
@@ -209,7 +224,7 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// FIXED LOCAL FALLBACK ENGINE
+// LOCAL FALLBACK ENGINE
 function runLocalFallbackSort(items) {
     let result = {};
     categories.forEach(c => result[c] = []);
@@ -278,7 +293,6 @@ function runLocalFallbackSort(items) {
 
         for (const [cat, keywords] of Object.entries(rules)) {
             if (categories.includes(cat)) {
-                // Fixed substring matching without invalid regex escapes
                 const matched = keywords.some(kw => lower.includes(kw));
 
                 if (matched) {
@@ -298,6 +312,7 @@ function runLocalFallbackSort(items) {
     return result;
 }
 
+// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Enhanced Local Backup
 async function sortListWithAI() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
@@ -437,16 +452,4 @@ function renderChecklistUI() {
         `;
 
         items.forEach((item, itemIndex) => {
-            groupHtml += `
-                <div class="grocery-row" id="row-${category}-${itemIndex}">
-                    <div class="grocery-left">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>${item}</span>
-                    </div>
-                    <button class="secondary-btn" onclick="openMoveModal('${category}', ${itemIndex})">Move</button>
-                </div>
-            `;
-        });
-
-        groupHtml += `</div>`;
-        area.innerHTML += grou
+            grou
