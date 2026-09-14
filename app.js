@@ -206,16 +206,22 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
+// AI Sorting with Primary (Flash Latest) and Backup (Pro Latest) Fallback Chain
 async function sortListWithAI() {
     const apiKey = document.getElementById('apiKey').value.trim();
     if (!apiKey) return alert("Please paste your Gemini API key in the top box first!");
     localStorage.setItem('gemini_api_key', apiKey);
 
     const inputText = document.getElementById('inputList').value;
+    const ignoreChecked = document.getElementById('ignoreChecked').checked;
     const btn = document.getElementById('btnSort');
     
     let items = inputText.split('\n')
-        .filter(item => !/^\s*(\[x\]|\[X\]|☑|✅)/.test(item))
+        .filter(item => {
+            const isChecked = /^\s*(\[x\]|\[X\]|☑|✅)/.test(item);
+            if (ignoreChecked && isChecked) return false; 
+            return true;
+        })
         .map(item => item.replace(/^\s*(\[\s?\]|☐|\*|-|\+)\s*/, '').trim())
         .filter(item => item.length > 0);
 
@@ -231,17 +237,56 @@ async function sortListWithAI() {
     Return ONLY a raw JSON object where keys are the category names and values are arrays of strings. Do NOT include markdown code ticks like \`\`\`json.
     List: ${JSON.stringify(items)}`;
 
+    // Fallback chain: Primary model first, Backup model second
+    const modelsToTry = ["gemini-flash-latest", "gemini-pro-latest"];
+    let success = false;
+    let aiText = "";
+
+    for (const model of modelsToTry) {
+        if (success) break;
+        
+        // Try each model twice in case of a temporary blip
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                btn.innerText = `⏳ Sorting using ${model === 'gemini-flash-latest' ? 'Flash' : 'Backup'}...`;
+                
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    // If overloaded (503), wait and retry or switch to backup model
+                    if (data.error.code === 503 || String(data.error.message).includes("high demand")) {
+                        await new Promise(r => setTimeout(r, 1500));
+                        continue;
+                    }
+                    throw new Error(data.error.message);
+                }
+
+                aiText = data.candidates[0].content.parts[0].text;
+                success = true;
+                break;
+            } catch (err) {
+                console.warn(`Model ${model} attempt ${attempt} failed:`, err);
+                if (attempt === 2) break; // Move to backup model
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+    }
+
+    btn.innerText = "✨ Sort Shopping List";
+    btn.disabled = false;
+
+    if (!success) {
+        alert("Both primary and backup AI servers are experiencing high traffic. Please wait a moment and try again.");
+        return;
+    }
+
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-
-        const data = await response.json();
-        if (data.error) throw new Error(data.error.message);
-
-        let aiText = data.candidates[0].content.parts[0].text;
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("Could not parse AI response.");
         
@@ -251,10 +296,7 @@ async function sortListWithAI() {
         document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error(error);
-        alert(`Sorting failed: ${error.message || "Unknown error occurred."}`);
-    } finally {
-        btn.innerText = "✨ Sort Shopping List";
-        btn.disabled = false;
+        alert(`Parsing failed: ${error.message}`);
     }
 }
 
