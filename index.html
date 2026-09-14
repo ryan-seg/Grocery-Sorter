@@ -39,7 +39,7 @@
   <div class="card">
     <label for="groqKey"><strong>Groq API Key (Primary & Fast):</strong></label>
     <input type="password" id="groqKey" placeholder="Paste Groq API key...">
-    <small><a href="https://console.groq.com/" target="_blank">Get a free Groq key here</a> (Extremely fast & reliable)</small>
+    <small><a href="https://console.groq.com/" target="_blank">Get a free Groq key here</a></small>
   </div>
 
   <button id="toggleSettings" class="secondary-btn">⚙️ Configure Categories, Supermarkets & Backups</button>
@@ -47,7 +47,7 @@
   <div id="settingsPanel" class="card hidden">
     <label for="apiKey"><strong>Gemini API Key (Backup):</strong></label>
     <input type="password" id="apiKey" placeholder="Paste Gemini API key (optional)...">
-    <small><a href="https://aistudio.google.com/" target="_blank">Get a free Gemini key here</a> as a secondary backup.</small>
+    <small><a href="https://aistudio.google.com/" target="_blank">Get a free Gemini key here</a></small>
 
     <hr>
     <h3>Categories</h3>
@@ -105,5 +105,17 @@
   </div>
 
   <script src="app.js"></script>
+  
+  <!-- NUKE OLD SERVICE WORKERS -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log("Unregistered old ghost service worker.");
+        }
+      });
+    }
+  </script>
 </body>
 </html>
