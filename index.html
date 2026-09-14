@@ -26,6 +26,8 @@
     .grocery-row.checked span { text-decoration: line-through; color: #888; }
     .grocery-left { display: flex; align-items: center; gap: 10px; flex-grow: 1; word-break: break-word; }
     .grocery-left input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    .checkbox-container { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 14px; cursor: pointer; }
+    .checkbox-container input { width: 18px; height: 18px; cursor: pointer; }
     a { color: #1a73e8; font-weight: bold; }
     hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
   </style>
@@ -34,7 +36,6 @@
 
   <h1>Grocery Sorter</h1>
   
-  <!-- API Key Setup -->
   <div class="card">
     <label for="apiKey"><strong>Gemini API Key:</strong></label>
     <input type="password" id="apiKey" placeholder="Paste your API key here...">
@@ -43,7 +44,6 @@
 
   <button id="toggleSettings" class="secondary-btn">⚙️ Configure Categories & Supermarkets</button>
 
-  <!-- Settings Panel -->
   <div id="settingsPanel" class="card hidden">
     <h3>Categories</h3>
     <div style="display:flex; gap: 5px;">
@@ -76,7 +76,6 @@
     </div>
   </div>
 
-  <!-- Main Inputs -->
   <div class="card">
     <label for="supermarketSelect"><strong>Select Supermarket Layout:</strong></label>
     <select id="supermarketSelect">
@@ -86,10 +85,13 @@
     <label for="inputList" style="margin-top: 10px; display:block;"><strong>Paste Raw Shopping List:</strong></label>
     <textarea id="inputList" placeholder="Paste unorganized list here (or share from Google Keep)..."></textarea>
     
+    <label class="checkbox-container">
+      <input type="checkbox" id="ignoreChecked" checked> Ignore items already checked off in Keep
+    </label>
+    
     <button id="btnSort">✨ Sort Shopping List</button>
   </div>
 
-  <!-- Interactive Output Checklist -->
   <div id="outputContainer" class="hidden">
     <h2>Shopping List</h2>
     <div id="checklistArea"></div>
