@@ -1,9 +1,13 @@
 // A simple mock database of categories (you can add more items here later!)
 const groceryDictionary = {
-    "Produce": ["apple", "apples", "banana", "lettuce", "tomato", "onion", "garlic", "potato", "carrot"],
-    "Dairy": ["milk", "cheese", "butter", "yogurt", "cream"],
-    "Meat": ["chicken", "beef", "pork", "sausage", "bacon", "mince"],
-    "Bakery": ["bread", "buns", "bagel", "wrap", "pita"]
+    "Produce": ["apple", "banana", "lettuce", "tomato", "onion", "garlic", "potato", "carrot", "avocado", "veg", "fruit"],
+    "Dairy": ["milk", "cheese", "butter", "yogurt", "cream", "cheddar", "mozzarella", "eggs"],
+    "Meat": ["chicken", "beef", "pork", "sausage", "bacon", "mince", "ham", "steak"],
+    "Bakery": ["bread", "buns", "bagel", "wrap", "pita", "sourdough", "crumpet"],
+    "Pantry": ["juice", "oil", "ketchup", "paste", "chips", "seasoning", "sauce", "beans", "tahini", "sweetener", "latte", "stock", "rice", "marmite", "mash", "trebor", "sugar", "flour", "pasta", "spice", "honey"],
+    "Household": ["cleaner", "wipes", "bags", "freshener", "foil", "tape", "roll", "detergent", "tablets", "plug-ins"],
+    "Toiletries": ["spray", "balm", "mouthwash", "toothpaste", "deodorant", "gel", "floss"],
+    "Frozen": ["ice cream", "frozen", "ice"]
 };
 
 // 1. HANDLE INCOMING SHARE 
