@@ -10,16 +10,23 @@
     textarea { width: 100%; height: 150px; margin-bottom: 10px; padding: 10px; box-sizing: border-box;}
     button { padding: 10px 15px; margin-right: 10px; margin-bottom: 20px; cursor: pointer; background: #4285f4; color: white; border: none; border-radius: 5px;}
     button:hover { background: #3367d6; }
+    .settings { background: #f1f3f4; padding: 10px; margin-bottom: 20px; border-radius: 5px; font-size: 0.9em; }
+    input[type="password"] { padding: 5px; width: 100%; margin-top: 5px; box-sizing: border-box;}
   </style>
 </head>
 <body>
 
   <h1>Grocery Sorter</h1>
   
+  <div class="settings">
+    <label for="apiKey"><strong>Gemini API Key (Free):</strong></label>
+    <input type="password" id="apiKey" placeholder="Paste your AI key here...">
+  </div>
+  
   <label for="inputList"><strong>Raw List (from Keep):</strong></label>
   <textarea id="inputList" placeholder="Paste list here, or share from Google Keep..."></textarea>
   
-  <button id="btnSort">Sort into Categories</button>
+  <button id="btnSort">✨ Sort with AI</button>
 
   <label for="outputList"><strong>Organized List:</strong></label>
   <textarea id="outputList" placeholder="Categorized list will appear here..."></textarea>
@@ -30,9 +37,10 @@
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Service Worker Registered'));
+      navigator.serviceWorker.register('sw.js');
     }
   </script>
+</body>
+</html>
 </body>
 </html>
