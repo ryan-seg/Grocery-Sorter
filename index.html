@@ -37,14 +37,19 @@
   <h1>Grocery Sorter</h1>
   
   <div class="card">
-    <label for="apiKey"><strong>Gemini API Key:</strong></label>
-    <input type="password" id="apiKey" placeholder="Paste your API key here...">
-    <small><a href="https://aistudio.google.com/" target="_blank">Get a free key here</a> (Sign in -> Get API Key)</small>
+    <label for="groqKey"><strong>Groq API Key (Primary & Fast):</strong></label>
+    <input type="password" id="groqKey" placeholder="Paste Groq API key...">
+    <small><a href="https://console.groq.com/" target="_blank">Get a free Groq key here</a> (Extremely fast & reliable)</small>
   </div>
 
-  <button id="toggleSettings" class="secondary-btn">⚙️ Configure Categories & Supermarkets</button>
+  <button id="toggleSettings" class="secondary-btn">⚙️ Configure Categories, Supermarkets & Backups</button>
 
   <div id="settingsPanel" class="card hidden">
+    <label for="apiKey"><strong>Gemini API Key (Backup):</strong></label>
+    <input type="password" id="apiKey" placeholder="Paste Gemini API key (optional)...">
+    <small><a href="https://aistudio.google.com/" target="_blank">Get a free Gemini key here</a> as a secondary backup.</small>
+
+    <hr>
     <h3>Categories</h3>
     <div style="display:flex; gap: 5px;">
       <input type="text" id="newCategory" placeholder="e.g. Household, Bakery">
@@ -62,7 +67,7 @@
     <div id="supermarketList"></div>
 
     <div id="supermarketLayoutArea" class="card hidden" style="background: #f8f9fa;">
-      <h4 id="layoutTitle" style="margin-top:0;">Edit Aisle Order</h4>
+      <h4 id="layoutTitle" style="margin-top:0;">Edit Aisle Layout</h4>
       <p><small>Move categories up or down to match your walk through the store.</small></p>
       <div id="layoutList"></div>
     </div>
