@@ -19,6 +19,7 @@ try {
 
 let editingSupermarket = null;
 let currentSortedData = {};
+let moveContext = null; // Holds item info when move modal is open
 
 // Safe App Initialization
 function initApp() {
@@ -32,13 +33,11 @@ function initApp() {
     renderCategories();
     renderSupermarkets();
 
-    // Restore last selected supermarket
     const lastSupermarket = localStorage.getItem('last_supermarket');
     if (lastSupermarket && document.getElementById('supermarketSelect')) {
         document.getElementById('supermarketSelect').value = lastSupermarket;
     }
 
-    // Handle Incoming Share from Google Keep
     const urlParams = new URLSearchParams(window.location.search);
     const sharedText = urlParams.get('text');
     const sharedTitle = urlParams.get('title');
@@ -299,7 +298,7 @@ function runLocalFallbackSort(items) {
     return result;
 }
 
-// --- AI SORTING ENGINE WITH FULL DIAGNOSTICS & NATIVE JSON MODE ---
+// --- AI SORTING ENGINE WITH DIAGNOSTICS & NATIVE JSON MODE ---
 window.sortListWithAI = async function() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
@@ -471,14 +470,13 @@ function renderChecklistUI() {
         `;
 
         items.forEach((itemObj, itemIndex) => {
-            // Support both object state and string
             let name = typeof itemObj === 'string' ? itemObj : itemObj.name;
             let isChecked = typeof itemObj === 'object' ? itemObj.checked : false;
 
             totalItems++;
             if (isChecked) checkedItems++;
 
-            if (hideCompleted && isChecked) return; // Skip rendering if user chose to hide checked items
+            if (hideCompleted && isChecked) return;
 
             visibleItemsCount++;
             groupHtml += `
@@ -498,7 +496,6 @@ function renderChecklistUI() {
         }
     });
 
-    // Update Progress Bar
     const percent = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
     document.getElementById('progressText').innerText = `${checkedItems} / ${totalItems} Completed (${percent}%)`;
     document.getElementById('progressBar').style.width = `${percent}%`;
@@ -519,7 +516,6 @@ window.addQuickItem = function() {
     const val = input.value.trim();
     if (!val) return;
 
-    // Default to Miscellaneous or first category
     const targetCat = categories.includes("Miscellaneous") ? "Miscellaneous" : categories[0];
     if (!currentSortedData[targetCat]) currentSortedData[targetCat] = [];
     currentSortedData[targetCat].push({ name: val, checked: false });
@@ -528,20 +524,47 @@ window.addQuickItem = function() {
     renderChecklistUI();
 }
 
+// --- MOVE ITEM TAP-TO-SELECT MODAL ---
 window.openMoveModal = function(fromCategory, itemIndex) {
     let itemObj = currentSortedData[fromCategory][itemIndex];
     let itemName = typeof itemObj === 'string' ? itemObj : itemObj.name;
     
-    const targetCat = prompt(`Move "${itemName}" to which category?\n\nAvailable:\n${categories.join(', ')}`);
+    moveContext = { fromCategory, itemIndex, itemObj };
+
+    document.getElementById('moveModalTitle').innerText = `Move "${itemName}"`;
     
-    if (targetCat && categories.includes(targetCat)) {
-        currentSortedData[fromCategory].splice(itemIndex, 1);
-        if (!currentSortedData[targetCat]) currentSortedData[targetCat] = [];
-        currentSortedData[targetCat].push(itemObj);
-        renderChecklistUI();
-    } else if (targetCat) {
-        alert("Category not found. Please match exact category names.");
-    }
+    const container = document.getElementById('moveCategoryButtons');
+    container.innerHTML = '';
+
+    // Render tap-able buttons for all categories EXCEPT current category
+    categories.forEach(cat => {
+        if (cat !== fromCategory) {
+            container.innerHTML += `<button class="category-btn" onclick="executeMove('${cat}')">${cat}</button>`;
+        }
+    });
+
+    document.getElementById('moveModal').classList.remove('hidden');
+}
+
+window.executeMove = function(targetCategory) {
+    if (!moveContext) return;
+
+    const { fromCategory, itemIndex, itemObj } = moveContext;
+
+    // Remove from old category
+    currentSortedData[fromCategory].splice(itemIndex, 1);
+
+    // Add to new category
+    if (!currentSortedData[targetCategory]) currentSortedData[targetCategory] = [];
+    currentSortedData[targetCategory].push(itemObj);
+
+    closeMoveModal();
+    renderChecklistUI();
+}
+
+window.closeMoveModal = function() {
+    document.getElementById('moveModal').classList.add('hidden');
+    moveContext = null;
 }
 
 window.copyChecklistToClipboard = function() {
