@@ -1,5 +1,5 @@
 // Default State
-let categories = ["Produce", "Dairy & Chilled", "Meat & Fish", "Bakery", "Pantry", "Household", "Toiletries", "Frozen", "Miscellaneous"];
+let categories = ["Produce", "Dairy & Chilled", "Meat & Fish", "Bakery", "Pantry", "Household", "Toiletries", "Frozen", "Free From", "Beer, Wine & Spirits", "Miscellaneous"];
 try {
     const savedCats = localStorage.getItem('categories');
     if (savedCats) {
@@ -20,7 +20,7 @@ try {
 let editingSupermarket = null;
 let currentSortedData = {};
 
-// Safe App Initialization (Handles both ready and loading states)
+// Safe App Initialization
 function initApp() {
     const savedGroq = localStorage.getItem('groq_api_key');
     if (savedGroq) document.getElementById('groqKey').value = savedGroq;
@@ -226,66 +226,81 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// Local Dictionary Engine (Offline Backup)
+// EXPANDED COMPREHENSIVE LOCAL UK SUPERMARKET AISLE DICTIONARY
 function runLocalFallbackSort(items) {
     let result = {};
     categories.forEach(c => result[c] = []);
     
     const rules = {
         "Produce": [
-            "apple", "apples", "banana", "bananas", "avo", "avos", "avocado", "avocadoes", "avocados", 
-            "lemon", "lemons", "lime", "limes", "strawberry", "strawberries", "strawbs", "blueberry", "blueberries", 
-            "raspberry", "raspberries", "peach", "peaches", "pomegranate", "cherry", "cherries", "mango", "fruit", 
-            "tomato", "tomatoes", "datterino", "onion", "onions", "garlic", "potato", "potatoes", "spud", "spuds", 
-            "carrot", "carrots", "salad", "rocket", "lettuce", "cucumber", "courgette", "courgettes", "pepper", 
-            "peppers", "mushroom", "mushrooms", "spinach", "bean", "beans", "runner beans", "green beans", 
-            "stringless beans", "cabbage", "leek", "leeks", "asparagus", "herb", "herbs", "basil", "chive", "chives", 
-            "mint", "sweet potato", "sweet potatoes", "aubergine", "spring onion", "spring onions", "corn", 
-            "celery", "rotisserie chicken", "cooked chicken", "cured meats", "quiche", "hummus", "dip", "dips"
+            "veg", "vegetables", "fruit", "fruits", "salad", "salads", "apple", "apples", "banana", "bananas", 
+            "avo", "avos", "avocado", "avocadoes", "avocados", "lemon", "lemons", "lime", "limes", "strawberry", 
+            "strawberries", "strawbs", "blueberry", "blueberries", "raspberry", "raspberries", "peach", "peaches", 
+            "pomegranate", "cherry", "cherries", "mango", "tomato", "tomatoes", "datterino", "onion", "onions", 
+            "garlic", "potato", "potatoes", "spud", "spuds", "carrot", "carrots", "rocket", "lettuce", "cucumber", 
+            "courgette", "courgettes", "pepper", "peppers", "mushroom", "mushrooms", "spinach", "bean", "beans", 
+            "runner beans", "green beans", "stringless beans", "cabbage", "leek", "leeks", "asparagus", "herb", 
+            "herbs", "basil", "chive", "chives", "mint", "sweet potato", "sweet potatoes", "aubergine", "spring onion", 
+            "spring onions", "corn", "celery"
         ],
         "Dairy & Chilled": [
-            "milk", "milks", "lf milk", "oat milk", "dairy", "cheese", "cheeses", "cheddar", "mozzarella", "parmesan", 
-            "parmigiano", "feta", "burrata", "halloumi", "cottage cheese", "cream cheese", "mascarpone", "sour cream", 
-            "creme fraiche", "whipping cream", "double cream", "clotted cream", "elmlea", "butter", "norpak", "margarine", 
-            "egg", "eggs", "yoghurt", "yogurt", "kefir", "pudding", "custard", "ready meal", "lasagne sheets", 
-            "shortcrust pastry", "garlic bread", "guacamole", "perinnaise"
+            "dairy", "milk", "milks", "lf milk", "oat milk", "longlife milk", "uht milk", "cheese", "cheeses", 
+            "cheddar", "mozzarella", "parmesan", "parmigiano", "feta", "burrata", "halloumi", "cottage cheese", 
+            "cream cheese", "mascarpone", "sour cream", "creme fraiche", "whipping cream", "double cream", 
+            "clotted cream", "elmlea", "butter", "norpak", "margarine", "egg", "eggs", "yoghurt", "yogurts", 
+            "yogurt", "kefir", "puddings", "pudding", "custard", "cooked meats", "ham", "cured meats", "quiche", 
+            "ready meals", "lasagne sheets", "shortcrust pastry", "garlic bread", "hummus", "dip", "dips", "perinnaise"
         ],
         "Meat & Fish": [
-            "chicken", "chickens", "beef", "pork", "sausage", "sausages", "bacon", "mince", "ham", "steak", 
-            "steaks", "fish", "salmon", "tuna", "prawn", "prawns", "lardons", "chorizo", "pepperoni", "turkey", 
-            "burgers", "burger", "breaded chicken", "meat", "lamb"
+            "fresh meats", "chicken", "chickens", "rotisserie chicken", "whole chicken", "beef", "pork", "sausage", 
+            "sausages", "bacon", "mince", "ham", "steak", "steaks", "fish", "salmon", "tuna", "prawn", "prawns", 
+            "lardons", "chorizo", "pepperoni", "turkey", "burgers", "burger", "breaded chicken", "meat", "lamb"
         ],
         "Bakery": [
-            "bread", "breads", "loaf", "sourdough", "bun", "buns", "bagel", "bagels", "wrap", "wraps", "pita", 
-            "pittas", "crumpet", "crumpets", "muffin", "muffins", "pastry", "pastries", "croissant", "brioche", 
-            "flatbread", "focaccia", "tortilla", "tortillas", "roll", "rolls", "scone", "scones", "panini"
+            "bakery", "bread", "breads", "loaf", "sourdough", "bun", "buns", "bagel", "bagels", "wrap", "wraps", 
+            "pita", "pittas", "crumpet", "crumpets", "muffin", "muffins", "pastry", "pastries", "croissant", 
+            "brioche", "flatbread", "focaccia", "tortilla", "tortillas", "roll", "rolls", "scone", "scones", 
+            "panini", "cake", "cakes"
         ],
         "Pantry": [
-            "oil", "olive oil", "ketchup", "paste", "chipotle", "chipotle paste", "sauce", "sauces", "pesto", 
-            "mayo", "mayonnaise", "salad cream", "dressing", "vinegar", "balsamic", "glaze", "syrup", "honey", 
-            "agave", "chutney", "hot sauce", "passata", "puree", "tomato puree", "beans", "baked beans", "black beans", 
-            "butter beans", "cannelini", "pulses", "lentils", "chickpeas", "rice", "basmati", "spaghetti", "pasta", 
-            "gnocchi", "risotto", "noodles", "cereal", "weetabix", "oats", "granola", "flour", "sugar", "caster sugar", 
-            "brown sugar", "bicarbonate", "cocoa", "choc chips", "chocolate", "vanilla", "yeast", "salt", "peppercorns", 
-            "paprika", "turmeric", "spices", "seasoning", "stock", "stock cubes", "mash", "instant mash", "coffee", 
-            "tea", "hot chocolate", "squash", "cordial", "juice", "pepsi", "fanta", "cider", "wine", "rioja", "crisps", 
-            "sweets", "biscuits", "oreos", "biscoff", "jam", "marmite", "tinned fruit", "chopped tomatoes", "mutti", "polpa"
+            "oil", "olive oil", "jam", "honey", "tinned fruit", "spices", "spice", "stock", "stock cubes", "seasoning", 
+            "peanut butter", "sauces", "sauce", "mayonnaise", "mayo", "pickles", "pickle", "rice", "basmati", 
+            "pulses", "lentils", "chickpeas", "tinned foods", "pasta", "spaghetti", "gnocchi", "risotto", "soups", 
+            "soup", "dried fruits", "seeds", "nuts", "coffee", "cereal", "weetabix", "oats", "granola", "tea", 
+            "flour", "sugar", "caster sugar", "brown sugar", "baking goods", "bicarbonate", "cocoa", "choc chips", 
+            "chocolate", "vanilla", "yeast", "salt", "peppercorns", "paprika", "turmeric", "mash", "instant mash", 
+            "passata", "puree", "tomato puree", "beans", "baked beans", "black beans", "butter beans", "cannelini", 
+            "squash", "cordials", "cordial", "juice", "pepsi", "fanta", "biscuits", "sweets", "oreos", "biscoff", 
+            "marmite", "chopped tomatoes", "mutti", "polpa", "tahini", "ketchup", "salad cream", "dressing", 
+            "vinegar", "balsamic", "glaze", "syrup", "agave", "chutney", "hot sauce"
         ],
         "Household": [
-            "cleaner", "cleaning", "wipes", "kitchen wipes", "anti bac wipes", "floor wipes", "big wipes", 
+            "tissues", "toilet roll", "toilet paper", "cleaning", "lightbulbs", "laundry", "pet food", "bird food", 
+            "cat food", "dog food", "cleaner", "wipes", "kitchen wipes", "anti bac wipes", "floor wipes", "big wipes", 
             "bags", "bin bags", "kitchen bin bags", "bathroom bin bags", "food bags", "freshener", "air freshener", 
-            "foil", "foil tray", "tape", "paper tape", "roll", "kitchen roll", "toilet roll", "toilet paper", 
-            "detergent", "laundry detergent", "fabric conditioner", "tablets", "dishwasher tablets", "dishwasher cleaner", 
-            "sponges", "duster", "silicone", "weed killer", "slug pellets", "twine", "paint", "compost"
+            "foil", "foil tray", "tape", "paper tape", "roll", "kitchen roll", "detergent", "laundry detergent", 
+            "fabric conditioner", "tablets", "dishwasher tablets", "dishwasher cleaner", "sponges", "duster", 
+            "silicone", "weed killer", "slug pellets", "twine", "paint", "compost", "books", "greeting cards", 
+            "cards", "magazines", "papers", "stationery", "dvd", "electronics", "toys", "homeware", "kitchenware", 
+            "car care", "clothing", "shoes"
         ],
         "Toiletries": [
-            "spray", "body spray", "balm", "lip balm", "mouthwash", "toothpaste", "deodorant", "gel", "shave gel", 
-            "floss", "dental floss", "shampoo", "soap", "multivitamins", "vitamin", "hayfever", "hay fever", 
-            "tablets", "serum", "rituals"
+            "haircare", "shampoo", "sun lotion", "beauty", "dental", "toothpaste", "bath", "soap", "medicine", 
+            "shaving", "shave gel", "baby", "sanitary", "nappies", "pads", "tampons", "spray", "body spray", "balm", 
+            "lip balm", "mouthwash", "deodorant", "gel", "floss", "dental floss", "multivitamins", "vitamin", 
+            "hayfever", "hay fever", "serum", "rituals"
         ],
         "Frozen": [
-            "ice cream", "ice creams", "nuii", "frozen", "ice", "ice cubes", "frozen berries", "frozen spinach", 
-            "frozen mushrooms", "frozen fish", "fish fingers", "chips", "frozen smoothie"
+            "frozen", "frozen fish", "pizza", "frozen veg", "frozen meat", "frozen ready meals", "ice cream", 
+            "ice creams", "desserts", "nuii", "ice", "ice cubes", "frozen berries", "frozen spinach", 
+            "frozen mushrooms", "fish fingers", "chips", "frozen smoothie"
+        ],
+        "Free From": [
+            "free from", "gluten free", "gf", "dairy free", "lactose free", "lf"
+        ],
+        "Beer, Wine & Spirits": [
+            "spirits", "wine", "beer", "cider", "alcohol", "fizzy drinks", "bottled water", "sparkling water", 
+            "cider", "rioja", "pimms"
         ]
     };
 
@@ -313,7 +328,7 @@ function runLocalFallbackSort(items) {
     return result;
 }
 
-// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Offline Engine
+// AI Sorting Engine
 window.sortListWithAI = async function() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
@@ -339,7 +354,7 @@ window.sortListWithAI = async function() {
     if (!categories.includes("Miscellaneous")) categories.push("Miscellaneous");
 
     const prompt = `You are an expert British supermarket grocery classifier. Categorize the items strictly into ONLY these categories: ${categories.join(', ')}.
-    Apply realistic UK grocery logic (e.g., Cheddar -> Dairy & Chilled, Foil tray -> Household, Chipotle paste -> Pantry, Boots spray -> Toiletries).
+    Apply realistic UK grocery logic based on standard UK supermarket layouts (e.g. Cheddar -> Dairy & Chilled, Longlife milk -> Bakery/Pantry or Dairy, Greeting cards/Lightbulbs/Car care -> Household, Cordials/Water -> Beer, Wine & Spirits or Pantry, Free From items -> Free From).
     Return ONLY a raw JSON object where keys are category names and values are arrays of string items. No markdown.
     List to sort: ${JSON.stringify(items)}`;
 
@@ -439,82 +454,4 @@ function renderChecklistUI() {
     if (!area) return;
     area.innerHTML = '';
 
-    const selectedSupermarket = document.getElementById('supermarketSelect').value;
-    const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
-
-    sortOrder.forEach(cat => { if (!currentSortedData[cat]) currentSortedData[cat] = []; });
-
-    sortOrder.forEach(category => {
-        const items = currentSortedData[category] || [];
-        if (items.length === 0) return;
-
-        let groupHtml = `
-            <div class="category-group">
-                <h4>${category}</h4>
-        `;
-
-        items.forEach((item, itemIndex) => {
-            groupHtml += `
-                <div class="grocery-row" id="row-${category}-${itemIndex}">
-                    <div class="grocery-left">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>${item}</span>
-                    </div>
-                    <button class="secondary-btn" onclick="openMoveModal('${category}', ${itemIndex})">Move</button>
-                </div>
-            `;
-        });
-
-        groupHtml += `</div>`;
-        area.innerHTML += groupHtml;
-    });
-}
-
-window.toggleCheck = function(checkbox) {
-    const row = checkbox.closest('.grocery-row');
-    if (checkbox.checked) {
-        row.classList.add('checked');
-    } else {
-        row.classList.remove('checked');
-    }
-}
-
-window.openMoveModal = function(fromCategory, itemIndex) {
-    const itemName = currentSortedData[fromCategory][itemIndex];
-    const targetCat = prompt(`Move "${itemName}" from ${fromCategory} to which category?\n\nAvailable categories:\n${categories.filter(c => c !== fromCategory).join(', ')}`);
-    
-    if (targetCat && categories.includes(targetCat)) {
-        currentSortedData[fromCategory].splice(itemIndex, 1);
-        if (!currentSortedData[targetCat]) currentSortedData[targetCat] = [];
-        currentSortedData[targetCat].push(itemName);
-        renderChecklistUI();
-    } else if (targetCat) {
-        alert("Category not found. Please match exact category names.");
-    }
-}
-
-window.copyChecklistToClipboard = function() {
-    let outputText = "Organized Groceries\n\n";
-    const selectedSupermarket = document.getElementById('supermarketSelect').value;
-    const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
-
-    sortOrder.forEach(category => {
-        const items = currentSortedData[category] || [];
-        if (items.length > 0) {
-            outputText += `${category.toUpperCase()}:\n`;
-            items.forEach(i => outputText += `[ ] ${i}\n`);
-            outputText += `\n`;
-        }
-    });
-
-    navigator.clipboard.writeText(outputText.trim()).then(() => {
-        alert("Checklist copied to clipboard! You can paste it into Keep or notes.");
-    });
-}
-
-window.clearShoppingList = function() {
-    if (confirm("Clear current shopping list?")) {
-        document.getElementById('outputContainer').classList.add('hidden');
-        document.getElementById('checklistArea').innerHTML = '';
-    }
-}
+    const selectedSupermarket = documen
