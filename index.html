@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grocery Sorter</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    textarea { width: 100%; height: 150px; margin-bottom: 10px; padding: 10px; box-sizing: border-box;}
+    button { padding: 10px 15px; margin-right: 10px; margin-bottom: 20px; cursor: pointer; background: #4285f4; color: white; border: none; border-radius: 5px;}
+    button:hover { background: #3367d6; }
+  </style>
+</head>
+<body>
+
+  <h1>Grocery Sorter</h1>
+  
+  <label for="inputList"><strong>Raw List (from Keep):</strong></label>
+  <textarea id="inputList" placeholder="Paste list here, or share from Google Keep..."></textarea>
+  
+  <button id="btnSort">Sort into Categories</button>
+
+  <label for="outputList"><strong>Organized List:</strong></label>
+  <textarea id="outputList" placeholder="Categorized list will appear here..."></textarea>
+  
+  <button id="btnShare">Share back to Keep</button>
+  <button id="btnCopy">Copy to Clipboard</button>
+
+  <script src="app.js"></script>
+  <script>
+    // Register the Service Worker (Required for PWA installation)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker Registered'));
+    }
+  </script>
+</body>
+</html>
