@@ -6,137 +6,97 @@
   <title>Grocery Sorter</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    textarea { width: 100%; height: 150px; margin-bottom: 10px; padding: 10px; box-sizing: border-box;}
-    button { padding: 10px 15px; margin-right: 5px; margin-bottom: 15px; cursor: pointer; background: #4285f4; color: white; border: none; border-radius: 5px;}
-    button:hover { background: #3367d6; }
+    body { font-family: system-ui, sans-serif; padding: 15px; max-width: 650px; margin: auto; color: #333; background: #f9f9f9; }
+    h1, h2, h3 { color: #1a73e8; }
+    textarea { width: 100%; height: 120px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    button { padding: 10px 15px; margin: 5px 5px 10px 0; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 6px; font-weight: 600; }
+    button:hover { background: #1557b0; }
     .secondary-btn { background: #e0e0e0; color: #333; }
     .secondary-btn:hover { background: #d0d0d0; }
-    .settings { background: #f1f3f4; padding: 15px; margin-bottom: 20px; border-radius: 5px; font-size: 0.9em; }
-    input[type="password"], input[type="text"], select { padding: 8px; width: 100%; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
+    .danger-btn { background: #d93025; color: white; }
+    .danger-btn:hover { background: #b31412; }
+    .card { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .hidden { display: none; }
-    .list-item { display: flex; justify-content: space-between; background: #fff; padding: 8px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 4px; align-items: center;}
-    .list-item button { padding: 5px 10px; margin: 0 0 0 5px; margin-bottom: 0; }
-    hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }
-    a { color: #4285f4; font-weight: bold; }
+    .list-item { display: flex; justify-content: space-between; background: #f1f3f4; padding: 8px 12px; margin-bottom: 6px; border-radius: 6px; align-items: center; font-size: 14px; }
+    .list-item button { padding: 4px 8px; margin: 0 0 0 4px; font-size: 12px; }
+    select, input[type="text"], input[type="password"] { padding: 10px; width: 100%; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+    .category-group { margin-bottom: 15px; background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #1a73e8; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .category-group h4 { margin: 0 0 8px 0; color: #1a73e8; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
+    .grocery-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
+    .grocery-row.checked span { text-decoration: line-through; color: #888; }
+    .grocery-left { display: flex; align-items: center; gap: 10px; flex-grow: 1; word-break: break-word; }
+    .grocery-left input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    a { color: #1a73e8; font-weight: bold; }
+    hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
   </style>
 </head>
 <body>
 
   <h1>Grocery Sorter</h1>
   
-  <div class="settings">
+  <!-- API Key Setup -->
+  <div class="card">
     <label for="apiKey"><strong>Gemini API Key:</strong></label>
     <input type="password" id="apiKey" placeholder="Paste your API key here...">
-    <small><a href="https://aistudio.google.com/" target="_blank">Get your free API key here</a> (Tap "Sign in", then "Get API Key" on the left)</small>
+    <small><a href="https://aistudio.google.com/" target="_blank">Get a free key here</a> (Sign in -> Get API Key)</small>
   </div>
 
-  <button id="toggleSettings" class="secondary-btn">⚙️ Manage Categories & Supermarkets</button>
+  <button id="toggleSettings" class="secondary-btn">⚙️ Configure Categories & Supermarkets</button>
 
-  <div id="settingsPanel" class="settings hidden">
+  <!-- Settings Panel -->
+  <div id="settingsPanel" class="card hidden">
     <h3>Categories</h3>
-    <div style="display:flex;">
-      <input type="text" id="newCategory" placeholder="New category name (e.g., Pets)">
-      <button id="btnAddCategory" style="margin-left:5px; margin-top:5px; height: 35px;">Add</button>
+    <div style="display:flex; gap: 5px;">
+      <input type="text" id="newCategory" placeholder="e.g. Household, Bakery">
+      <button id="btnAddCategory" style="margin-top:5px; height: 42px;">Add</button>
     </div>
     <div id="categoryList"></div>
 
     <hr>
     
-    <h3>Supermarkets</h3>
-    <div style="display:flex;">
-      <input type="text" id="newSupermarket" placeholder="e.g., Aldi, Tesco">
-      <button id="btnAddSupermarket" style="margin-left:5px; margin-top:5px; height: 35px;">Add</button>
+    <h3>Supermarkets & Aisle Layouts</h3>
+    <div style="display:flex; gap: 5px;">
+      <input type="text" id="newSupermarket" placeholder="e.g. Aldi, M&S">
+      <button id="btnAddSupermarket" style="margin-top:5px; height: 42px;">Add</button>
     </div>
     <div id="supermarketList"></div>
 
-    <div id="supermarketLayoutArea" class="hidden">
-      <hr>
-      <h4 id="layoutTitle">Edit Layout</h4>
-      <p><small>Move categories up or down to match the store layout.</small></p>
+    <div id="supermarketLayoutArea" class="card hidden" style="background: #f8f9fa;">
+      <h4 id="layoutTitle" style="margin-top:0;">Edit Aisle Order</h4>
+      <p><small>Move categories up or down to match your walk through the store.</small></p>
       <div id="layoutList"></div>
     </div>
-  </div>
-  
-  <label for="supermarketSelect"><strong>Sorting For:</strong></label>
-  <select id="supermarketSelect">
-    <option value="Default">Default Order</option>
-  </select>
-  
-  <label for="inputList" style="margin-top: 10px; display:block;"><strong>Raw List (from Keep):</strong></label>
-  <textarea id="inputList" placeholder="Paste list here, or share from Google Keep..."></textarea>
-  
-  <button id="btnSort">✨ Sort with AI</button>
-
-  <label for="outputList"><strong>Organized List:</strong></label>
-  <textarea id="outputList" placeholder="Categorized list will appear here..."></textarea>
-  
-  <button id="btnShare">Share back to Keep</button>
-  <button id="btnCopy">Copy to Clipboard</button>
-
-  <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
-</body>
-</html>
-    <h3>Categories</h3>
-    <div style="display:flex;">
-      <input type="text" id="newCategory" placeholder="New category name (e.g., Pets)">
-      <button id="btnAddCategory" style="margin-left:5px; margin-top:5px; height: 35px;">Add</button>
-    </div>
-    <div id="categoryList"></div>
 
     <hr>
-    
-    <h3>Supermarkets</h3>
-    <div style="display:flex;">
-      <input type="text" id="newSupermarket" placeholder="e.g., Aldi, Tesco">
-      <button id="btnAddSupermarket" style="margin-left:5px; margin-top:5px; height: 35px;">Add</button>
-    </div>
-    <div id="supermarketList"></div>
-
-    <div id="supermarketLayoutArea" class="hidden">
-      <hr>
-      <h4 id="layoutTitle">Edit Layout</h4>
-      <p><small>Move categories up or down to match the store layout.</small></p>
-      <div id="layoutList"></div>
+    <h3>Data Backup</h3>
+    <div style="display:flex; gap: 10px;">
+      <button id="btnExport" class="secondary-btn" style="flex:1;">📤 Export Backup</button>
+      <button id="btnImportTrigger" class="secondary-btn" style="flex:1;">📥 Import Backup</button>
+      <input type="file" id="importFile" class="hidden" accept=".json">
     </div>
   </div>
-  
-  <label for="supermarketSelect"><strong>Sorting For:</strong></label>
-  <select id="supermarketSelect">
-    <option value="Default">Default Order</option>
-  </select>
-  
-  <label for="inputList" style="margin-top: 10px; display:block;"><strong>Raw List (from Keep):</strong></label>
-  <textarea id="inputList" placeholder="Paste list here, or share from Google Keep..."></textarea>
-  
-  <button id="btnSort">✨ Sort with AI</button>
 
-  <label for="outputList"><strong>Organized List:</strong></label>
-  <textarea id="outputList" placeholder="Categorized list will appear here..."></textarea>
-  
-  <button id="btnShare">Share back to Keep</button>
-  <button id="btnCopy">Copy to Clipboard</button>
+  <!-- Main Inputs -->
+  <div class="card">
+    <label for="supermarketSelect"><strong>Select Supermarket Layout:</strong></label>
+    <select id="supermarketSelect">
+      <option value="Default">Default Order</option>
+    </select>
+    
+    <label for="inputList" style="margin-top: 10px; display:block;"><strong>Paste Raw Shopping List:</strong></label>
+    <textarea id="inputList" placeholder="Paste unorganized list here (or share from Google Keep)..."></textarea>
+    
+    <button id="btnSort">✨ Sort Shopping List</button>
+  </div>
+
+  <!-- Interactive Output Checklist -->
+  <div id="outputContainer" class="hidden">
+    <h2>Shopping List</h2>
+    <div id="checklistArea"></div>
+    <button id="btnCopy" class="secondary-btn">📋 Copy List to Clipboard</button>
+    <button id="btnClearList" class="danger-btn">🗑️ Clear List</button>
+  </div>
 
   <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
-</body>
-</html>
-  <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
-</body>
-</html>
 </body>
 </html>
