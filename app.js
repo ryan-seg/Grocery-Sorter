@@ -209,7 +209,7 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// AI Sorting with Chain: 1st Groq (Llama 3) -> 2nd Gemini Flash -> 3rd Gemini Pro
+// AI Sorting with Fixed Groq Integration & Gemini Fallbacks
 async function sortListWithAI() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
@@ -249,7 +249,7 @@ async function sortListWithAI() {
     let success = false;
     let aiText = "";
 
-    // 1. PRIMARY: Try Groq (Llama 3 70B) - Ultra Fast & Reliable Free Tier
+    // 1. PRIMARY: Try Groq (Llama 3.3 70B)
     if (groqKey && !success) {
         try {
             btn.innerText = "⏳ Sorting with Groq (Llama 3)...";
@@ -266,11 +266,11 @@ async function sortListWithAI() {
                 })
             });
             const data = await res.json();
-            if (data.choices && data.choices[0]) {
+            if (data.choices && data.choices[0] && data.choices[0].message) {
                 aiText = data.choices[0].message.content;
                 success = true;
             }
-        } catch (e) { console.warn("Groq failed", e); }
+        } catch (e) { console.warn("Groq failed:", e); }
     }
 
     // 2. SECONDARY BACKUP: Try Gemini Flash
@@ -283,11 +283,11 @@ async function sortListWithAI() {
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
             const data = await res.json();
-            if (!data.error) {
+            if (data.candidates && data.candidates[0]) {
                 aiText = data.candidates[0].content.parts[0].text;
                 success = true;
             }
-        } catch (e) { console.warn("Flash failed", e); }
+        } catch (e) { console.warn("Flash failed:", e); }
     }
 
     // 3. TERTIARY BACKUP: Try Gemini Pro
@@ -300,18 +300,18 @@ async function sortListWithAI() {
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
             const data = await res.json();
-            if (!data.error) {
+            if (data.candidates && data.candidates[0]) {
                 aiText = data.candidates[0].content.parts[0].text;
                 success = true;
             }
-        } catch (e) { console.warn("Pro failed", e); }
+        } catch (e) { console.warn("Pro failed:", e); }
     }
 
     btn.innerText = "✨ Sort Shopping List";
     btn.disabled = false;
 
     if (!success) {
-        alert("All AI providers are currently experiencing heavy traffic. Please try again in a moment.");
+        alert("All AI providers failed. Please verify your Groq or Gemini API key is correct in the settings.");
         return;
     }
 
