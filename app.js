@@ -209,7 +209,7 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// EXPANDED COMPREHENSIVE LOCAL UK SUPERMARKET DICTIONARY
+// FIXED LOCAL FALLBACK ENGINE
 function runLocalFallbackSort(items) {
     let result = {};
     categories.forEach(c => result[c] = []);
@@ -278,11 +278,8 @@ function runLocalFallbackSort(items) {
 
         for (const [cat, keywords] of Object.entries(rules)) {
             if (categories.includes(cat)) {
-                // Exact match check or boundary check to prevent misclassifications
-                const matched = keywords.some(kw => {
-                    const regex = new RegExp(`\\b${kw}\\b`, 'i');
-                    return regex.test(lower);
-                });
+                // Fixed substring matching without invalid regex escapes
+                const matched = keywords.some(kw => lower.includes(kw));
 
                 if (matched) {
                     result[cat].push(item);
@@ -301,7 +298,6 @@ function runLocalFallbackSort(items) {
     return result;
 }
 
-// AI Sorting with Chain: Groq -> Gemini Flash -> Gemini Pro -> Enhanced Local Backup
 async function sortListWithAI() {
     const groqKey = document.getElementById('groqKey').value.trim();
     const geminiKey = document.getElementById('apiKey').value.trim();
@@ -446,4 +442,11 @@ function renderChecklistUI() {
                     <div class="grocery-left">
                         <input type="checkbox" onchange="toggleCheck(this)">
                         <span>${item}</span>
-                   
+                    </div>
+                    <button class="secondary-btn" onclick="openMoveModal('${category}', ${itemIndex})">Move</button>
+                </div>
+            `;
+        });
+
+        groupHtml += `</div>`;
+        area.innerHTML += grou
