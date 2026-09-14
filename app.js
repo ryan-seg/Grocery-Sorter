@@ -7,6 +7,9 @@ let editingSupermarket = null;
 let currentSortedData = {};
 
 window.addEventListener('DOMContentLoaded', () => {
+    const savedGroq = localStorage.getItem('groq_api_key');
+    if (savedGroq) document.getElementById('groqKey').value = savedGroq;
+
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) document.getElementById('apiKey').value = savedKey;
 
@@ -206,11 +209,17 @@ function saveData() {
     localStorage.setItem('supermarkets', JSON.stringify(supermarkets));
 }
 
-// AI Sorting with Primary (Flash Latest) and Backup (Pro Latest) Fallback Chain
+// AI Sorting with Chain: 1st Groq (Llama 3) -> 2nd Gemini Flash -> 3rd Gemini Pro
 async function sortListWithAI() {
-    const apiKey = document.getElementById('apiKey').value.trim();
-    if (!apiKey) return alert("Please paste your Gemini API key in the top box first!");
-    localStorage.setItem('gemini_api_key', apiKey);
+    const groqKey = document.getElementById('groqKey').value.trim();
+    const geminiKey = document.getElementById('apiKey').value.trim();
+
+    if (!groqKey && !geminiKey) {
+        return alert("Please paste at least a Groq API key or a Gemini API key in the settings!");
+    }
+    
+    if (groqKey) localStorage.setItem('groq_api_key', groqKey);
+    if (geminiKey) localStorage.setItem('gemini_api_key', geminiKey);
 
     const inputText = document.getElementById('inputList').value;
     const ignoreChecked = document.getElementById('ignoreChecked').checked;
@@ -237,52 +246,72 @@ async function sortListWithAI() {
     Return ONLY a raw JSON object where keys are the category names and values are arrays of strings. Do NOT include markdown code ticks like \`\`\`json.
     List: ${JSON.stringify(items)}`;
 
-    // Fallback chain: Primary model first, Backup model second
-    const modelsToTry = ["gemini-flash-latest", "gemini-pro-latest"];
     let success = false;
     let aiText = "";
 
-    for (const model of modelsToTry) {
-        if (success) break;
-        
-        // Try each model twice in case of a temporary blip
-        for (let attempt = 1; attempt <= 2; attempt++) {
-            try {
-                btn.innerText = `⏳ Sorting using ${model === 'gemini-flash-latest' ? 'Flash' : 'Backup'}...`;
-                
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
+    // 1. PRIMARY: Try Groq (Llama 3 70B) - Ultra Fast & Reliable Free Tier
+    if (groqKey && !success) {
+        try {
+            btn.innerText = "⏳ Sorting with Groq (Llama 3)...";
+            const res = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${groqKey}`,
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [{ role: "user", content: prompt }],
+                    temperature: 0.1
+                })
+            });
+            const data = await res.json();
+            if (data.choices && data.choices[0]) {
+                aiText = data.choices[0].message.content;
+                success = true;
+            }
+        } catch (e) { console.warn("Groq failed", e); }
+    }
 
-                const data = await response.json();
-                
-                if (data.error) {
-                    // If overloaded (503), wait and retry or switch to backup model
-                    if (data.error.code === 503 || String(data.error.message).includes("high demand")) {
-                        await new Promise(r => setTimeout(r, 1500));
-                        continue;
-                    }
-                    throw new Error(data.error.message);
-                }
-
+    // 2. SECONDARY BACKUP: Try Gemini Flash
+    if (geminiKey && !success) {
+        try {
+            btn.innerText = "⏳ Groq busy. Trying Gemini Flash...";
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            if (!data.error) {
                 aiText = data.candidates[0].content.parts[0].text;
                 success = true;
-                break;
-            } catch (err) {
-                console.warn(`Model ${model} attempt ${attempt} failed:`, err);
-                if (attempt === 2) break; // Move to backup model
-                await new Promise(r => setTimeout(r, 1000));
             }
-        }
+        } catch (e) { console.warn("Flash failed", e); }
+    }
+
+    // 3. TERTIARY BACKUP: Try Gemini Pro
+    if (geminiKey && !success) {
+        try {
+            btn.innerText = "⏳ Trying Gemini Pro backup...";
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key=${geminiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            if (!data.error) {
+                aiText = data.candidates[0].content.parts[0].text;
+                success = true;
+            }
+        } catch (e) { console.warn("Pro failed", e); }
     }
 
     btn.innerText = "✨ Sort Shopping List";
     btn.disabled = false;
 
     if (!success) {
-        alert("Both primary and backup AI servers are experiencing high traffic. Please wait a moment and try again.");
+        alert("All AI providers are currently experiencing heavy traffic. Please try again in a moment.");
         return;
     }
 
