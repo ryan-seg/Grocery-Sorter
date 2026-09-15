@@ -168,8 +168,11 @@
         <button onclick="addQuickItem()" class="secondary-btn" style="margin:0; white-space:nowrap;">+ Add</button>
       </div>
 
-      <button onclick="copyChecklistToClipboard()" class="secondary-btn">📋 Copy List to Clipboard</button>
-      <button onclick="clearShoppingList()" class="danger-btn">🗑️ Clear List</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button onclick="copyChecklistForKeep(true)" class="secondary-btn" style="flex:1;">📋 Copy Unchecked for Keep</button>
+        <button onclick="copyChecklistForKeep(false)" class="secondary-btn" style="flex:1;">📋 Copy All Items</button>
+      </div>
+      <button onclick="clearShoppingList()" class="danger-btn" style="width:100%; margin-top:5px;">🗑️ Clear List</button>
     </div>
   </div>
 
