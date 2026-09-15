@@ -1,30 +1,18 @@
 {
   "name": "Grocery Sorter",
   "short_name": "Groceries",
-  "start_url": "/Grocery-Sorter/",
-  "scope": "/Grocery-Sorter/",
+  "description": "Smart UK Grocery List Classifier",
+  "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#4285f4",
+  "theme_color": "#1a73e8",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://via.placeholder.com/512",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
-  ],
-  "share_target": {
-    "action": "/Grocery-Sorter/",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  }
+  ]
 }
