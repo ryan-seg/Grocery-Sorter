@@ -19,7 +19,7 @@ try {
 
 let editingSupermarket = null;
 let currentSortedData = {};
-let moveContext = null; // Holds item info when move modal is open
+let moveContext = null;
 
 // Safe App Initialization
 function initApp() {
@@ -536,7 +536,6 @@ window.openMoveModal = function(fromCategory, itemIndex) {
     const container = document.getElementById('moveCategoryButtons');
     container.innerHTML = '';
 
-    // Render tap-able buttons for all categories EXCEPT current category
     categories.forEach(cat => {
         if (cat !== fromCategory) {
             container.innerHTML += `<button class="category-btn" onclick="executeMove('${cat}')">${cat}</button>`;
@@ -551,10 +550,8 @@ window.executeMove = function(targetCategory) {
 
     const { fromCategory, itemIndex, itemObj } = moveContext;
 
-    // Remove from old category
     currentSortedData[fromCategory].splice(itemIndex, 1);
 
-    // Add to new category
     if (!currentSortedData[targetCategory]) currentSortedData[targetCategory] = [];
     currentSortedData[targetCategory].push(itemObj);
 
@@ -567,26 +564,38 @@ window.closeMoveModal = function() {
     moveContext = null;
 }
 
-window.copyChecklistToClipboard = function() {
-    let outputText = "Organized Groceries\n\n";
+// --- CLEAN KEEP EXPORT (NO BRACKETS) ---
+window.copyChecklistForKeep = function(uncheckedOnly = true) {
+    let outputText = "";
     const selectedSupermarket = document.getElementById('supermarketSelect').value;
     const sortOrder = selectedSupermarket === "Default" ? categories : (supermarkets[selectedSupermarket] || categories);
 
     sortOrder.forEach(category => {
         const items = currentSortedData[category] || [];
-        if (items.length > 0) {
-            outputText += `${category.toUpperCase()}:\n`;
-            items.forEach(i => {
+        
+        // Filter items based on user choice
+        const filteredItems = items.filter(i => {
+            let isChecked = typeof i === 'object' ? i.checked : false;
+            return uncheckedOnly ? !isChecked : true;
+        });
+
+        if (filteredItems.length > 0) {
+            outputText += `--- ${category.toUpperCase()} ---\n`;
+            filteredItems.forEach(i => {
                 let name = typeof i === 'string' ? i : i.name;
-                let isChecked = typeof i === 'object' ? i.checked : false;
-                outputText += `[${isChecked ? 'x' : ' '}] ${name}\n`;
+                // Output clean plain lines without [ ] or [x]
+                outputText += `${name}\n`;
             });
             outputText += `\n`;
         }
     });
 
+    if (!outputText.trim()) {
+        return alert(uncheckedOnly ? "All items are checked off! Nothing to copy." : "List is empty.");
+    }
+
     navigator.clipboard.writeText(outputText.trim()).then(() => {
-        alert("Checklist copied to clipboard!");
+        alert(uncheckedOnly ? "Unchecked items copied! Paste directly into Keep." : "All items copied!");
     });
 }
 
